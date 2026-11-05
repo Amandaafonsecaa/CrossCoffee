@@ -3,3 +3,8 @@ node_modules/
 *.log
 dist/
 .env
+
+# backend: segredos e cache de respostas das APIs
+backend/.env
+backend/cache/*
+!backend/cache/.gitkeep

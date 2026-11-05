@@ -7,26 +7,27 @@
  *   npm run vendor
  *
  * Gera:
- *   vendor/gsap.min.js
- *   vendor/three.min.js
- *   fonts/*.woff2
- *   css/fonts.css   (@font-face apontando para ../fonts/)
+ *   frontend/vendor/gsap.min.js
+ *   frontend/vendor/three.min.js
+ *   frontend/fonts/*.woff2
+ *   frontend/css/fonts.css   (@font-face apontando para ../fonts/)
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const frontend = join(root, "frontend");
 const nm = (...p) => join(root, "node_modules", ...p);
 const warnings = [];
 
-mkdirSync(join(root, "vendor"), { recursive: true });
-mkdirSync(join(root, "fonts"), { recursive: true });
+mkdirSync(join(frontend, "vendor"), { recursive: true });
+mkdirSync(join(frontend, "fonts"), { recursive: true });
 
 /* ---------- GSAP ---------- */
 const gsapSrc = nm("gsap", "dist", "gsap.min.js");
 if (existsSync(gsapSrc)) {
-  copyFileSync(gsapSrc, join(root, "vendor", "gsap.min.js"));
+  copyFileSync(gsapSrc, join(frontend, "vendor", "gsap.min.js"));
   console.log("✔ vendor/gsap.min.js");
 } else {
   warnings.push("gsap não encontrado em node_modules (rode `npm install`).");
@@ -35,7 +36,7 @@ if (existsSync(gsapSrc)) {
 /* ---------- Three.js (build UMD: funciona sem módulos, inclusive por file://) ---------- */
 const threeSrc = nm("three", "build", "three.min.js");
 if (existsSync(threeSrc)) {
-  copyFileSync(threeSrc, join(root, "vendor", "three.min.js"));
+  copyFileSync(threeSrc, join(frontend, "vendor", "three.min.js"));
   console.log("✔ vendor/three.min.js");
 } else {
   warnings.push("three não encontrado em node_modules (rode `npm install`).");
@@ -59,12 +60,12 @@ for (const f of FONTS) {
   for (const [w, style] of variants) {
     const name = files.find((x) => x === `${f.pkg}-latin-${w}-${style}.woff2`);
     if (!name) { warnings.push(`${f.family} ${w} ${style}: arquivo latin woff2 não encontrado em ${dir}`); continue; }
-    copyFileSync(join(dir, name), join(root, "fonts", name));
+    copyFileSync(join(dir, name), join(frontend, "fonts", name));
     css += `@font-face {\n  font-family: "${f.family}";\n  font-style: ${style};\n  font-weight: ${w};\n  font-display: swap;\n  src: url("../fonts/${name}") format("woff2");\n}\n`;
     console.log(`✔ fonts/${name}`);
   }
 }
-writeFileSync(join(root, "css", "fonts.css"), css);
+writeFileSync(join(frontend, "css", "fonts.css"), css);
 console.log("✔ css/fonts.css");
 
 if (warnings.length) {
@@ -72,12 +73,5 @@ if (warnings.length) {
   warnings.forEach((w) => console.log("  - " + w));
 }
 
-console.log(`
-Próximos passos (se ainda não fez):
-  1. No index.html, troque os 3 <link> do Google Fonts por:
-       <link rel="stylesheet" href="css/fonts.css">
-  2. Antes de js/cutscene.js, carregue o GSAP:
-       <script src="vendor/gsap.min.js"></script>
-  3. Migre as animações (veja CLAUDE.md, seção "Pendências para o notebook").
-`);
+console.log("\nArquivos locais atualizados em frontend/.");
 process.exit(warnings.length ? 1 : 0);

@@ -4,7 +4,7 @@
   "private": true,
   "description": "Jornal de época folheável com palavras cruzadas e sudoku como atração principal",
   "scripts": {
-    "start": "python3 -m http.server 8000",
+    "start": "python3 -m http.server 8000 --directory frontend",
     "vendor": "node scripts/vendor.mjs"
   },
   "dependencies": {
