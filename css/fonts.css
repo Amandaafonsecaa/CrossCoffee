@@ -1,0 +1,64 @@
+/* Gerado por scripts/vendor.mjs — não edite à mão. */
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/playfair-display-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("../fonts/playfair-display-latin-900-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Baskerville";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/libre-baskerville-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Baskerville";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/libre-baskerville-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Baskerville";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/libre-baskerville-latin-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Old Standard TT";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/old-standard-tt-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Old Standard TT";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/old-standard-tt-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Old Standard TT";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/old-standard-tt-latin-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "UnifrakturCook";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/unifrakturcook-latin-700-normal.woff2") format("woff2");
+}

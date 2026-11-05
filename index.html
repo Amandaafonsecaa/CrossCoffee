@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14100b">
+  <title>A Gazeta do Dia — protótipo</title>
+
+  <!-- Fontes locais (geradas por `npm run vendor`) -->
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Primeira visita? (a cena da varanda só toca uma vez; depois, só o jornal desamassando) -->
+  <script>
+    try { if (!localStorage.getItem("gazeta:cutscene")) document.documentElement.classList.add("first"); }
+    catch (e) { document.documentElement.classList.add("first"); }
+  </script>
+</head>
+<body>
+
+  <!-- ABERTURA: bola de jornal amassada que se abre (3D, js/crumple.js) -->
+  <div id="intro" aria-live="polite">
+    <div id="intro-3d"></div>
+    <p class="intro-loading">Desamassando o jornal<span class="dots"></span></p>
+    <button id="skip" class="skip-btn" type="button">Pular ▸</button>
+  </div>
+
+  <!-- CENA DA VARANDA (primeira visita ou "Reviver a entrega") -->
+  <div id="cutscene">
+    <div class="cs-frame">
+      <div id="cs-scene"></div>
+      <div id="cs-vignette"></div>
+      <div id="cs-paper" class="paper">
+        <div class="cs-mast">
+          <p class="intro-kicker">Edição de hoje</p>
+          <h1 class="masthead">A Gazeta<br>do Dia</h1>
+          <p class="intro-date js-date"></p>
+          <div class="intro-rule"></div>
+        </div>
+      </div>
+      <div id="cs-black"></div>
+    </div>
+    <button id="cs-skip" class="skip-btn" type="button">Pular ▸</button>
+  </div>
+
+  <!-- JORNAL: no celular, uma página; no computador, duas páginas abertas -->
+  <div id="stage">
+    <main id="book" aria-label="Jornal">
+
+      <!-- PÁGINA 1 — CAPA -->
+      <section class="page paper" data-title="Capa" aria-label="Capa">
+        <div class="page-inner">
+          <header class="nameplate">
+            <div class="ear ear-l">
+              <b>O Tempo</b>
+              Manhã de céu aberto, brisa leve do mar. Máx. 27°, mín. 18°.
+            </div>
+            <h1 class="masthead masthead-front">A Gazeta do Dia</h1>
+            <div class="ear ear-r">
+              <b>Edição Matutina</b>
+              Preço único: um sorriso. Assinaturas na redação.
+            </div>
+          </header>
+          <p class="motto">“Tudo o que cabe numa manhã”</p>
+          <div class="dateline">
+            <span>Ano I — Nº 001</span>
+            <span class="js-date"></span>
+            <span>4 páginas</span>
+          </div>
+
+          <h2 class="banner">Palavras cruzadas voltam à moda e tomam conta da manhã</h2>
+          <p class="deck">Entre o café e o primeiro bonde, a cidade inteira parece ter um lápis atrás da orelha</p>
+
+          <div class="front-grid">
+            <article class="story lead-story">
+              <figure class="photo">
+                <canvas class="halftone" width="720" height="480" aria-hidden="true"></canvas>
+                <figcaption>Na Praça da Matriz, leitores dividem o banco e a última dica da cruzada. <i>(Foto: Arquivo da Gazeta)</i></figcaption>
+              </figure>
+              <div class="cols">
+                <p class="dropcap">Nas varandas, nas padarias e nos pontos de bonde, cresce o número de pessoas debruçadas sobre a mesma folha. Quem passou a vida lendo só as manchetes agora começa pelo fim: a página dos passatempos.</p>
+                <p>“O jornal é o único lugar onde errar a resposta custa só uma borracha”, comenta um leitor fiel, enquanto conta quadradinhos. A reportagem confirmou: ninguém quer saber o placar, todos querem saber a palavra de cinco letras.</p>
+                <p>Na Confeitaria Central, o garçom já anota o pedido e a dica da vertical no mesmo bloquinho. Na barbearia da esquina, a fila anda devagar porque o barbeiro também quer terminar o sudoku.</p>
+                <p>Seguem na edição de hoje as palavras cruzadas, o sudoku e os classificados. Boa leitura — e bom lápis.</p>
+              </div>
+            </article>
+
+            <div class="side">
+              <aside class="box-hoje">
+                <h3>Hoje nos passatempos</h3>
+                <ul>
+                  <li><button type="button" data-goto="1"><b>Pág. 2</b> · Palavras cruzadas</button></li>
+                  <li><button type="button" data-goto="2"><b>Pág. 3</b> · Sudoku</button></li>
+                  <li><button type="button" data-goto="3"><b>Pág. 4</b> · Classificados</button></li>
+                </ul>
+              </aside>
+
+              <article class="story brief">
+                <h3 class="hl-2">Padeiro jura que o pão sai mais quente às seis</h3>
+                <p>O senhor Anselmo, da Rua das Flores, garante que o forno “acorda de bom humor” antes do sol. A freguesia não discute: às seis e cinco já não há bisnaga.</p>
+              </article>
+
+              <article class="story brief">
+                <h3 class="hl-3">Bonde da linha 4 atrasa por causa de um gato</h3>
+                <p>O animal, de cor rajada, recusou-se a deixar os trilhos durante dez minutos. Passageiros aproveitaram para adiantar a cruzada.</p>
+              </article>
+
+              <div class="ad">
+                <p class="ad-name">Café Bom Dia</p>
+                <p class="ad-line">Torrado na hora · Moído na frente do freguês</p>
+                <p class="ad-small">Acompanha bem qualquer palavra cruzada. Rua do Comércio, 12.</p>
+              </div>
+            </div>
+          </div>
+
+          <button id="replay" type="button">↺ Reviver a entrega do jornal</button>
+        </div>
+      </section>
+
+      <!-- PÁGINA 2 — PALAVRAS CRUZADAS -->
+      <section class="page paper" data-title="Cruzadas" aria-label="Palavras cruzadas">
+        <div class="page-inner">
+          <div class="folio"><span>A Gazeta do Dia</span><span class="js-date"></span><span>Página 2</span></div>
+          <header class="sec-head">
+            <span class="sec-kicker">Passatempos</span>
+            <h2 class="sec-title">Palavras Cruzadas</h2>
+            <span class="sec-sub">Nº 1 · nível fácil</span>
+          </header>
+
+          <div id="cw" class="cw">
+            <div id="cw-clue-bar" class="cw-clue-bar" aria-live="polite">Toque numa casa para começar</div>
+
+            <div class="cw-grid-wrap">
+              <div id="cw-grid" class="cw-grid" role="grid" aria-label="Grade de palavras cruzadas"></div>
+              <input id="cw-input" type="text" value="_" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" inputmode="text" enterkeyhint="next" aria-label="Digite as letras da palavra cruzada">
+              <div id="cw-stamp" class="stamp" aria-hidden="true">Resolvido!</div>
+            </div>
+
+            <div class="cw-actions">
+              <button type="button" id="cw-check">Verificar</button>
+              <button type="button" id="cw-hint">Dica</button>
+              <button type="button" id="cw-clear">Limpar</button>
+            </div>
+
+            <div class="cw-clues">
+              <div>
+                <h4>Horizontais</h4>
+                <ol id="cw-across"></ol>
+              </div>
+              <div>
+                <h4>Verticais</h4>
+                <ol id="cw-down"></ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PÁGINA 3 — SUDOKU -->
+      <section class="page paper" data-title="Sudoku" aria-label="Sudoku">
+        <div class="page-inner">
+          <div class="folio"><span>A Gazeta do Dia</span><span class="js-date"></span><span>Página 3</span></div>
+          <header class="sec-head">
+            <span class="sec-kicker">Passatempos</span>
+            <h2 class="sec-title">Sudoku</h2>
+            <span class="sec-sub">Nº 1 · nível fácil</span>
+          </header>
+
+          <div id="sd-msg" class="cw-clue-bar" aria-live="polite">Toque numa casa e escolha um número</div>
+
+          <div class="sudoku-wrap">
+            <div id="sudoku" class="sudoku" role="grid" aria-label="Grade de sudoku"></div>
+            <div id="sd-stamp" class="stamp" aria-hidden="true">Resolvido!</div>
+          </div>
+
+          <div id="sd-pad" class="sd-pad" aria-label="Teclado numérico"></div>
+
+          <div class="cw-actions">
+            <button type="button" id="sd-notes" aria-pressed="false">Lápis: off</button>
+            <button type="button" id="sd-check">Verificar</button>
+            <button type="button" id="sd-hint">Dica</button>
+            <button type="button" id="sd-clear">Limpar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PÁGINA 4 — CLASSIFICADOS -->
+      <section class="page paper" data-title="Classif." aria-label="Classificados">
+        <div class="page-inner">
+          <div class="folio"><span>A Gazeta do Dia</span><span class="js-date"></span><span>Página 4</span></div>
+          <header class="sec-head">
+            <span class="sec-kicker">Compra, venda e recados</span>
+            <h2 class="sec-title">Classificados</h2>
+            <span class="sec-sub">Anúncios até as 18h saem na edição seguinte</span>
+          </header>
+
+          <div class="classifieds">
+            <div class="cl"><h4>Vende-se</h4><p>Bicicleta de entregador, freio novo, buzina que funciona. Tratar com Tião, na banca.</p></div>
+            <div class="cl"><h4>Procura-se</h4><p>Palavra de cinco letras que signifique “alegria matinal”. Recompensa: um café.</p></div>
+            <div class="cl cl-box"><h4>Aulas de caligrafia</h4><p>Letra bonita em seis lições. Dona Celeste, Rua das Acácias, 40, das 14h às 17h.</p></div>
+            <div class="cl"><h4>Aluga-se</h4><p>Varanda com cadeira de balanço e vista para a rua arborizada. Ideal para ler jornal.</p></div>
+            <div class="cl"><h4>Achados</h4><p>Lápis de ponta fina encontrado no banco da praça. Reclamar na redação.</p></div>
+            <div class="cl"><h4>Recado</h4><p>M., o 3 vertical é “LISTA”. Não conte para ninguém. — R.</p></div>
+            <div class="cl cl-box"><h4>Relojoaria Ponteiro</h4><p>Consertamos relógios de bolso, de parede e de pulso. Pontualidade garantida.</p></div>
+            <div class="cl"><h4>Troca-se</h4><p>Coleção de selos por coleção de palavras cruzadas resolvidas a caneta.</p></div>
+            <div class="cl"><h4>Vende-se</h4><p>Rádio de válvula, madeira de lei, pega a rádio da capital com tempo bom.</p></div>
+            <div class="cl"><h4>Precisa-se</h4><p>Jornaleiro com boa pontaria. Exige-se pontualidade e simpatia com cachorros.</p></div>
+          </div>
+          <p class="end-mark">— Fim da edição —</p>
+        </div>
+      </section>
+
+      <div id="shade" aria-hidden="true"></div>
+    </main>
+
+  </div>
+
+  <nav id="nav" aria-label="Navegação do jornal">
+    <button type="button" id="prev" aria-label="Página anterior">◂</button>
+    <div id="tabs" role="tablist"></div>
+    <button type="button" id="next" aria-label="Próxima página">▸</button>
+  </nav>
+
+  <!-- MÃOS do leitor (3D low-poly) e a folha que vira — js/reader3d.js -->
+  <div id="hands3d" aria-hidden="true"></div>
+
+  <noscript><p style="position:fixed;inset:0;display:grid;place-items:center;background:#e7d7ac;color:#2a1f15;font:18px Georgia,serif;padding:24px;text-align:center">Este jornal precisa de JavaScript para ser folheado.</p></noscript>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="js/crossword-data.js"></script>
+  <script src="js/crossword.js"></script>
+  <script src="js/sudoku.js"></script>
+  <script src="js/cutscene.js"></script>
+  <script src="js/print.js"></script>
+  <script src="js/crumple.js"></script>
+  <script src="js/reader3d.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
