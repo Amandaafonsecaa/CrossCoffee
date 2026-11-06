@@ -143,6 +143,11 @@
   function playCutscene() {
     if (!hasCutscene || window.GazetaCutscene.isRunning()) return;
     window.GazetaCutscene.play({
+      // a capa de verdade, "fotografada", vira o jornal que o jornaleiro entrega
+      getPaper: function () {
+        if (!window.GazetaPrint) return null;
+        return fontsReady.then(function () { return snap(0, spread ? "left" : "single").canvas; });
+      },
       onReveal: function () { entered = true; stage.classList.add("ready"); setTimeout(showHands, 300); },
       onDone: function () {
         html.classList.remove("first");

@@ -1,6 +1,8 @@
 /* Cena de abertura: varanda, jornaleiro de bicicleta, jornal nos pés, mundo virando sépia.
-   SVG em camadas + Web Animations API (sem dependências).
-   Todas as animações passam pela função A() — para migrar para GSAP, troque só ela. */
+   Com WebGL: cena 3D low-poly (js/cutscene3d.js), em tela cheia, qualquer proporção.
+   Sem WebGL: a versão SVG em camadas abaixo (plano B, quadro em pé).
+   Este arquivo é dono do fluxo: fade do preto, botão Pular, título final e encerramento.
+   Todas as animações DOM passam pela função A() — para migrar para GSAP, troque só ela. */
 (function () {
   "use strict";
 
@@ -11,6 +13,8 @@
   var blackEl = document.getElementById("cs-black");
   var vignetteEl = document.getElementById("cs-vignette");
   var skipBtn = document.getElementById("cs-skip");
+  var frameEl = root.querySelector(".cs-frame");
+  var scene3d = null;
 
   var anims = [];
   var timers = [];
@@ -259,13 +263,48 @@
     at(9.5, finish);
   }
 
-  /* ---------- controle ---------- */
-  function cleanup() {
+  /* ---------- versão 3D: a cena anda sozinha; aqui ficam só as camadas DOM ---------- */
+  function mount3d() {
+    if (!window.GazetaCutscene3D || !window.GazetaCutscene3D.supported()) return false;
+    try {
+      host.innerHTML = "";
+      scene3d = window.GazetaCutscene3D.create({ container: host, getPaper: opts.getPaper });
+    } catch (e) {
+      if (window.console) console.warn("cena 3D:", e);
+      scene3d = null;
+    }
+    if (!scene3d) { host.innerHTML = ""; return false; }
+    frameEl.classList.add("is-3d");
+    return true;
+  }
+
+  function timeline3d() {
+    scene3d.start();
+    A(blackEl, [{ opacity: 1 }, { opacity: 0 }], 0, 1.0, { easing: "ease-out" });
+    // o tom de jornal nasce no papel (dentro da cena); a vinheta acompanha
+    A(vignetteEl, [{ opacity: 0 }, { opacity: 1 }], 7.0, 1.4);
+    // o jornal já cobre a tela: entra o título, como na versão SVG
+    paperEl.style.clipPath = "none";
+    A(paperEl, [{ opacity: 0 }, { opacity: 1 }], 8.45, .3, { easing: "linear" });
+    A(paperEl.querySelector(".cs-mast"), [{ opacity: 0, transform: "translateY(10px) scale(.96)" }, { opacity: 1, transform: "none" }], 8.7, .6, { easing: "ease-out" });
+    at(9.5, finish);
+  }
+
+  // para e descarta o que estiver tocando (cena 3D, animações), sem encerrar a cena
+  function stopMedia() {
     anims.forEach(function (a) { try { a.cancel(); } catch (e) {} });
     anims = [];
     timers.forEach(clearTimeout); timers = [];
+    if (scene3d) { scene3d.dispose(); scene3d = null; }
+    frameEl.classList.remove("is-3d");
+    paperEl.style.clipPath = "";
+    host.innerHTML = "";
   }
 
+  /* ---------- controle ---------- */
+  function cleanup() {
+    stopMedia();
+  }
   function finish() {
     if (finished) return;
     finished = true;
@@ -285,8 +324,8 @@
     running = true; finished = false;
     root.classList.remove("out");
     root.classList.add("on");
-    mount();
-    timeline();
+    if (mount3d()) timeline3d();
+    else { mount(); timeline(); }
   }
 
   function skip() { if (running && !finished) finish(); }

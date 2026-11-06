@@ -2,21 +2,21 @@
 
 ## 1. Visão geral
 
-**A Gazeta do Dia** é um projeto de site interativo, com expansão futura para aplicativo de celular e jogo na Steam, que simula a experiência de ler um **jornal de época folheável**.
+**A Gazeta do Dia** é um site que simula a experiência de ler um **jornal de época folheável**, com notícias fictícias e passatempos novos todos os dias.
 
-O usuário interage com um jornal antigo, visualmente inspirado em publicações impressas tradicionais, com papel envelhecido, tons sépia, tipografia clássica, fotografias em retícula e animações físicas.
+O usuário interage com um jornal antigo, com papel envelhecido, tons sépia, tipografia clássica, fotografias em retícula e animações físicas (mãos 3D que viram as páginas).
 
 O projeto combina três experiências:
 
-1. **Leitura imersiva:** um jornal virtual que pode ser folheado, com mãos 3D e animações de páginas.
-2. **Passatempos diários:** palavras-cruzadas e sudoku como atrações principais.
-3. **Jornalismo assistido por IA:** notícias reais, obtidas por APIs e processadas por inteligência artificial utilizando técnicas de RAG.
+1. **Leitura imersiva:** jornal virtual folheável, com mãos 3D e páginas que se curvam.
+2. **Passatempos diários:** palavras-cruzadas (atração principal) e sudoku.
+3. **Universo fictício gerado por IA:** notícias absurdas, engraçadas e ingênuas de uma cidade brasileira dos anos 1940–50, com personagens recorrentes e histórias que continuam entre edições.
 
-O objetivo é criar uma experiência nostálgica, interativa e recorrente, incentivando o usuário a abrir uma nova edição todos os dias.
+O objetivo é uma experiência nostálgica e recorrente, que faça o leitor voltar todos os dias. O projeto também é um **case de portfólio de engenharia de software e de IA** da proprietária, que está aprendendo enquanto constrói. Explique decisões técnicas em linguagem simples.
 
-**Idiomas:** toda a interface, os textos, as pistas das palavras-cruzadas e a comunicação do projeto devem estar em português brasileiro (pt-BR).
+**Idioma:** toda a interface, os textos, as pistas e a comunicação com a proprietária em português brasileiro (pt-BR).
 
-A visão original está documentada em `docs/CONCEITO.md`.
+A visão original está em `docs/CONCEITO.md`. As decisões abaixo (seções 3 a 7, 11 e 15) foram tomadas em brainstorming em 05/11/2026 e substituem o plano anterior de notícias reais via GNews.
 
 ---
 
@@ -53,308 +53,208 @@ As animações precisam ser fluidas, discretas e compatíveis com dispositivos m
 
 ---
 
-## 3. Estrutura editorial
+## 3. Estrutura editorial — DECIDIDO, A IMPLEMENTAR
 
-Cada edição contém quatro páginas principais.
+Cada edição tem **quatro páginas**. No computador continuam duas páginas lado a lado (1+2, 3+4), como hoje; no celular, uma por vez.
 
-| Página | Conteúdo | Atualização |
+| Página | Conteúdo | Gerado por |
 |---|---|---|
-| 1 — Capa | Notícias reais, manchetes, imagem e textos jornalísticos | Diária |
-| 2 — Palavras-cruzadas | Cruzadinha interativa em português brasileiro | Diária |
-| 3 — Sudoku | Desafio lógico interativo | Diária |
-| 4 — Classificados | Anúncios e conteúdos complementares de época | Inicialmente estáticos |
+| 1 — Capa | Notícias fictícias + **classificados no rodapé** | IA |
+| 2 — Palavras-cruzadas | 9×9 de segunda a sábado; **13×13 aos domingos** | Gerador próprio + pistas por IA |
+| 3 — Sudoku | 9×9, solução única | Algoritmo próprio (sem IA) |
+| 4 — Horóscopo | 12 signos, previsões absurdas no tom da cidade | IA |
 
-As páginas devem preservar a mesma identidade visual, independentemente da origem do conteúdo.
+A página "Classificados" deixa de existir como página: os anúncios viram rodapé da capa (conteúdo que o leitor pode ignorar).
+
+### Universo
+
+- **Cidade brasileira fictícia, anos 1940–50.** Bonde, praça da Matriz, padaria, confeitaria, rádio de válvula.
+- Os personagens já presentes no protótipo (Seu Anselmo da Rua das Flores, Dona Celeste da caligrafia, o bonde da linha 4, Café Bom Dia) são moradores oficiais da bíblia.
+- A cena de abertura já se passa nessa cidade (seção 8.1).
 
 ### Princípio editorial
 
-**As notícias são reais; a apresentação é retrô.**
+**Tudo é ficção, e isso deve ficar claro.** Humor **ingênuo, de época, para toda a família**:
 
-A inteligência artificial pode adaptar a linguagem e organizar a informação, mas não deve inventar acontecimentos, declarações, números, datas ou fontes.
+- Sem pessoas reais, política, religião ou tragédias reais.
+- Sem violência, palavrões ou duplo sentido.
+- Sem estereótipos ofensivos (raça, gênero, região, classe).
 
-Os conteúdos fictícios, como classificados humorísticos, devem ser identificados ou apresentados de modo que não sejam confundidos com notícias reais.
+### Continuidade
+
+Cada edição é uma **mistura**: notícias soltas, personagens sozinhos ou juntos, e histórias (arcos) que continuam e evoluem por algumas edições. Ver seção 5.
 
 ---
 
-# 4. Sistema de edições diárias — PLANEJADO
+## 4. Sistema de edições diárias — DECIDIDO, A IMPLEMENTAR
 
-Uma das funcionalidades centrais será a publicação automática de uma edição inédita todos os dias.
+### Princípio
 
-### Funcionamento esperado
-
-- Cada edição terá uma data única.
-- Uma nova edição será disponibilizada diariamente.
-- Todos os usuários visualizarão o mesmo conteúdo editorial daquela data.
-- A edição não será regenerada a cada atualização da página.
-- Notícias, palavras-cruzadas e sudoku serão armazenados de forma persistente.
-- Edições anteriores poderão ser consultadas futuramente.
-- O progresso dos jogos será independente para cada edição.
-- O sistema deverá funcionar mesmo quando uma API externa estiver indisponível.
+**Calendário fixo, não consumo por acesso.** Cada edição tem uma data. Todos os leitores veem a mesma edição naquele dia. Uma edição de um dia sem leitores não se perde: fica no arquivo de edições antigas. (O consumo por acesso foi descartado porque exigiria servidor com estado, banco e controle de concorrência só para economizar algo que custa zero.)
 
 ### Identificação
 
-Utilizar a data no formato `YYYY-MM-DD`.
+- Data `AAAA-MM-DD`, fuso editorial `America/Fortaleza`.
+- Progresso local por edição: `gazeta:progress:cw:2026-11-05`, `gazeta:progress:sd:2026-11-05`.
 
-O fuso horário editorial será `America/Fortaleza`.
+### Ciclo de vida
 
-Exemplo de identificação:
+```
+Mac da proprietária (1x por mês)          GitHub (todo dia)                    Vercel
+gerador → revisão de duvidosos →   estoque/ (criptografado) → Actions decifra   → site estático
+estoque com até 45 edições         só a edição de hoje → frontend/editions/       publicado
+```
 
-`gazeta:edition:2026-11-05`
+1. **Geração mensal no Mac:** `npm run gerar` (nome provisório) completa o estoque até **45 edições**. As edições são geradas **em ordem**, porque cada uma lembra das anteriores.
+2. **Revisão:** a proprietária vê uma página de prévia e decide só os itens marcados como duvidosos. Reprovar a edição N **regera de N em diante** (as seguintes podem ter herdado fatos dela).
+3. **Estoque criptografado** em `estoque/`. O repositório é público, então as edições futuras ficam cifradas; a chave fica só nos *secrets* do GitHub e num gerenciador de senhas da proprietária.
+4. **Publicação diária:** GitHub Actions roda às 00h05 de Fortaleza (e de novo às 00h35, porque o agendamento do GitHub pode atrasar), decifra **só a edição do dia** e a grava em `frontend/editions/`. A Vercel republica o site.
+5. **Aviso de estoque baixo:** quando restarem **15 edições**, o Actions abre uma *issue* (aviso por e-mail, gratuito).
 
-A edição deverá ser gerada e validada antes da publicação, preferencialmente por uma tarefa agendada.
+### Como o site escolhe a edição
 
-**A geração diária ainda não está implementada.**
+1. Calcula a data de hoje em `America/Fortaleza`.
+2. Tenta carregar `editions/AAAA-MM-DD.json`.
+3. Se não existir: carrega a mais recente publicada, com selo **"Edição extra"**.
+4. Se nada carregar (ex.: aberto via `file://`): usa a **Edição nº 0** embutida (o conteúdo atual do protótipo). O site nunca fica em branco.
 
----
+### Contrato da edição (formato `versao: 1`, rascunho)
 
-# 5. Notícias reais com API + IA + RAG — PLANEJADO
+```json
+{
+  "versao": 1,
+  "data": "2026-11-05",
+  "numero": 12,
+  "capa": { "manchete": "...", "materias": [], "classificados": [] },
+  "cruzada": { "tamanho": 9, "grade": [], "pistas": { "horizontais": {}, "verticais": {} } },
+  "sudoku": { "desafio": "81 dígitos", "solucao": "81 dígitos" },
+  "horoscopo": [{ "signo": "Áries", "texto": "..." }],
+  "geracao": { "modelo": "...", "notas": {} }
+}
+```
 
-## 5.1. Objetivo
-
-Substituir o conteúdo jornalístico estático por notícias reais e recentes, organizadas automaticamente em uma edição diária.
-
-O sistema deverá buscar notícias, selecionar as mais relevantes e produzir textos editoriais originais em português brasileiro, utilizando informações verificáveis.
-
-## 5.2. Fonte de notícias
-
-API inicialmente considerada:
-
-**GNews API**
-
-Documentação: https://docs.gnews.io/
-
-A integração deverá priorizar:
-
-- Notícias publicadas recentemente.
-- Fontes identificáveis.
-- Conteúdo em português.
-- Notícias brasileiras quando apropriado.
-- Categorias variadas.
-- Metadados como título, data, veículo e URL.
-
-Pesquisar e validar os limites, os custos e as permissões de uso antes de disponibilizar a funcionalidade em produção.
-
-A arquitetura não deve ficar permanentemente dependente de um único fornecedor.
-
-## 5.3. Pipeline de notícias
-
-Fluxo planejado:
-
-**API de notícias → filtragem → recuperação de fontes → IA/RAG → validação → edição diária**
-
-### Etapa 1 — Coleta
-
-Buscar um conjunto de notícias recentes utilizando a API.
-
-Armazenar os metadados e os conteúdos que a licença permitir.
-
-### Etapa 2 — Seleção
-
-Selecionar notícias considerando:
-
-- Relevância.
-- Atualidade.
-- Diversidade de assuntos.
-- Credibilidade e identificação das fontes.
-- Duplicação de acontecimentos.
-- Quantidade de informação disponível.
-
-### Etapa 3 — Recuperação de informações (RAG)
-
-A inteligência artificial receberá os conteúdos efetivamente recuperados das fontes selecionadas.
-
-O sistema poderá utilizar recuperação tradicional, banco de dados ou busca vetorial, conforme a necessidade real.
-
-**Um banco vetorial não é obrigatório na primeira versão.**
-
-Não utilizar conhecimentos internos do modelo como substitutos de evidências sobre acontecimentos recentes.
-
-### Etapa 4 — Produção editorial com IA
-
-A IA será responsável por:
-
-- Criar títulos jornalísticos originais e fiéis aos fatos.
-- Resumir as informações.
-- Organizar as notícias em textos apropriados para as colunas.
-- Padronizar a linguagem em pt-BR.
-- Ajustar o tamanho dos textos à diagramação.
-- Preservar a identidade editorial do jornal.
-
-### Etapa 5 — Validação
-
-Antes da publicação, verificar:
-
-- Se os fatos estão presentes nas fontes recuperadas.
-- Se datas, nomes e números estão corretos.
-- Se não foram inventadas citações.
-- Se existem referências para as informações publicadas.
-- Se os textos não reproduzem indevidamente materiais protegidos.
-- Se a edição contém conteúdo suficiente e legível.
-
-Conteúdos que não puderem ser sustentados pelas fontes devem ser descartados ou encaminhados para revisão.
-
-### Etapa 6 — Publicação
-
-Após a validação, salvar uma versão estável da edição.
-
-A edição deverá apresentar referências às fontes originais, respeitando os direitos e as condições de uso dos fornecedores.
-
-## 5.4. Requisitos de segurança e arquitetura
-
-- Não expor chaves de API no frontend.
-- Não chamar modelos de IA diretamente do navegador utilizando credenciais privadas.
-- Executar tarefas de geração em um ambiente seguro.
-- Utilizar cache e armazenamento persistente.
-- Definir limites de consumo e custos.
-- Registrar erros de geração.
-- Manter uma última edição válida como alternativa em caso de falha.
-
-Como o protótipo atual é inteiramente estático, a integração exigirá uma camada adicional de serviços ou um processo externo de geração que produza arquivos estáticos validados.
-
-**Não introduzir um backend complexo antes de avaliar a alternativa mais simples.**
+O gerador valida o contrato com Zod antes de gravar; o frontend só lê. Mudanças no contrato exigem aumentar `versao`.
 
 ---
 
-# 6. Palavras-cruzadas diárias via API — PLANEJADO
+## 5. IA, memória narrativa e RAG — DECIDIDO, A IMPLEMENTAR
 
-## 6.1. Objetivo
+### Onde roda
 
-Disponibilizar uma palavra-cruzada diferente em cada edição.
+**Localmente, no Mac da proprietária (Apple M4, 16 GB), via Ollama**, com modelo de licença aberta (preferir Apache 2.0, ex.: Qwen; os termos do Gemma são mais restritivos). Nada de IA no navegador nem na nuvem.
 
-Todas as pistas e respostas devem ser adequadas ao português brasileiro.
+- Motivo: custo zero garantido, sem cota, sem fornecedor. Os créditos gratuitos do Hugging Face foram reduzidos ou removidos (out/2026), então **não há plano B gratuito na nuvem**; o plano B é outro modelo local.
+- A conexão com o Ollama é feita com `fetch` direto (sem SDK) e **será escrita à mão pela proprietária, em par com o Claude**. Não implementar `gerador/src/ia/` sozinho.
+- O modelo é escolhido por **benchmark**: 2–3 modelos, mesmas pautas, notas da juíza e da proprietária. Medir também o tempo por edição.
 
-## 6.2. API considerada
+### Memória (arquivos JSON em `gerador/dados/`, sem banco)
 
-**Crossword Generator API**
+1. **Bíblia:** cidade, época, personagens-base, regras de humor. Fixa, aprovada pela proprietária.
+2. **Fichas vivas:** após cada notícia, a IA extrai fatos estruturados (`{ personagem, fato, edicao }`).
+3. **Arcos:** histórias em andamento, com capítulo atual, próximo passo e **fim obrigatório em poucas edições**.
 
-Site: https://crossword.texs.org/pt-BR
+### Pipeline de uma edição
 
-Documentação: https://crossword.texs.org/crossword-api
+```
+bíblia + fichas + arcos
+        ▼
+1. PAUTA (mistura sorteada: continuação de arco, personagem solo, encontro, notícia nova)
+2. ANTIRREPETIÇÃO (embeddings × notícias já publicadas)
+3. RECUPERAÇÃO (RAG): fichas/arcos por nome + fatos de tema parecido por embeddings
+4. REDAÇÃO (saída estruturada em JSON, limites de tamanho da diagramação)
+5. VERIFICAÇÃO
+   - código: contrato, tamanhos, ortografia (dicionário VERO)
+   - regras fixas: termos proibidos
+   - IA juíza: rubrica 1–5 (graça, tom familiar, coerência com a cidade, CONTRADIÇÃO com fatos recuperados)
+6. DECISÃO: aprovada | reescrever (até 2 tentativas) | duvidosa → revisão humana
+7. EXTRAÇÃO de fatos novos → fichas/arcos
+```
 
-A API possui suporte ao português, incluindo os identificadores `pt` e `pt-BR`.
+### Embeddings e vetores
 
-Entretanto, suas bases de português podem ser compartilhadas entre variantes do idioma.
+- Modelo de embeddings local via Ollama.
+- Usos reais: antirrepetição e busca de fatos por tema. Busca por personagem/arco é por nome (exata).
+- **Sem banco vetorial:** vetores em arquivo; comparação direta leva milissegundos até centenas de milhares de itens.
 
-Por isso, o sistema deverá validar a adequação linguística das palavras e das pistas antes de publicar a cruzadinha.
+### Avaliação (o que torna o projeto relevante como engenharia de IA)
 
-Verificar também os limites do plano gratuito, as funcionalidades disponíveis, as condições de atribuição e os custos de uso automatizado.
-
-## 6.3. Regras linguísticas
-
-- Idioma principal: português brasileiro.
-- Respostas em letras maiúsculas.
-- Respostas sem acentos, conforme a convenção atual.
-- Evitar vocabulário exclusivo de Portugal.
-- Evitar palavras inexistentes ou obscuras sem necessidade.
-- As pistas precisam corresponder exatamente às respostas.
-- Evitar ambiguidades que permitam diversas respostas igualmente válidas.
-
-Exemplo:
-
-**Pista:** Bebida preparada com grãos torrados.
-
-**Resposta:** CAFE
-
-## 6.4. Geração e validação
-
-A API será responsável pela montagem ou pelo preenchimento da grade, conforme as funcionalidades e condições disponíveis.
-
-A aplicação deverá validar:
-
-1. Dimensões da grade.
-2. Integridade dos cruzamentos.
-3. Numeração das pistas.
-4. Correspondência entre pistas e respostas.
-5. Normalização das palavras.
-6. Ausência de palavras inválidas.
-7. Compatibilidade com o componente interativo existente.
-
-Caso a geração falhe, utilizar uma cruzadinha previamente validada.
-
-Não publicar uma grade inválida apenas para cumprir a atualização diária.
-
-## 6.5. Integração com notícias
-
-Funcionalidade desejada:
-
-Quando possível, utilizar algumas palavras relacionadas às notícias daquela edição.
-
-Isso deve acontecer somente quando não comprometer a qualidade da grade ou das pistas.
-
-## 6.6. Compatibilidade com o projeto atual
-
-O protótipo utiliza uma grade de 5×5.
-
-A lógica existente em `frontend/js/crossword.js` calcula a numeração e as palavras a partir da grade.
-
-A integração deverá preservar:
-
-- Seleção de células.
-- Digitação por teclado.
-- Suporte ao teclado virtual no celular.
-- Navegação entre respostas.
-- Botões de dica, verificar e limpar.
-- Carimbo de conclusão.
-- Salvamento de progresso.
-
-O CSS utiliza `.cw-grid` com cinco colunas fixas.
-
-Se houver suporte a grades de outras dimensões, a configuração deve se tornar dinâmica.
-
-Não alterar o formato da grade sem garantir a compatibilidade com os componentes existentes.
+- **Calibração da juíza:** a proprietária avalia 30–50 matérias à mão (`gerador/avaliacao/`); medir a concordância juíza × humana.
+- **Experimento de memória:** gerar com e sem recuperação e comparar a taxa de contradições.
+- **Pistas:** taxa de pistas que passam no teste do solucionador (seção 6).
+- Resultados registrados em `gerador/avaliacao/` e resumidos em `docs/decisoes/`.
 
 ---
 
-# 7. Sudoku diário — PLANEJADO
+## 6. Palavras-cruzadas diárias — DECIDIDO, A IMPLEMENTAR
 
-O sudoku também será renovado diariamente.
+**Gerador próprio, sem API.** A Crossword Generator API (crossword.texs.org) foi avaliada e descartada: o plano gratuito tem 30 grades/mês (sem folga para falhas), pistas por IA só nos planos pagos, banco de pistas sem garantia de pt-BR, link de atribuição obrigatório e é um projeto de hobby de uma pessoa.
 
-Inicialmente, a preferência é utilizar um algoritmo próprio, evitando dependência de APIs externas.
+### Peças (em `gerador/src/cruzadinha/`)
 
-Requisitos:
+1. **Lista de palavras:** dicionário **VERO** (hunspell pt-BR do LibreOffice, LGPL/MPL; manter o arquivo de licença). Filtrar uma vez: sem acentos, maiúsculas, tamanhos úteis, remover palavras raras (com ajuda da IA local). As palavras vêm do dicionário, **nunca são inventadas pela IA**.
+2. **Moldes:** grades simétricas com bastante casa preta, no estilo dos jornais brasileiros antigos (facilita o preenchimento).
+3. **Preenchimento:** *backtracking* com heurística de "espaço mais restrito primeiro" e índice de palavras por padrão. Código próprio, sem dependências.
+4. **Pistas:** escritas pela IA local, no tom da cidade; quando possível, usar palavras das notícias do dia.
+5. **Verificação:**
+   - código: dimensões, cruzamentos, numeração, palavras na lista, sem repetição, compatibilidade com `frontend/js/crossword.js`;
+   - **teste do solucionador:** a IA recebe só a pista e tenta adivinhar a resposta; se errar, a pista é reescrita ou marcada como duvidosa.
 
-- Grade 9×9.
-- Solução válida.
-- Solução única.
-- Dificuldade controlada.
-- Validação antes da publicação.
-- Salvamento por edição.
-- Preservação do sistema de anotações a lápis.
-- Preservação das funções de dica, verificar e limpar.
+### Regras linguísticas
 
-O gerador deverá utilizar uma estratégia reproduzível e permitir testar automaticamente a validade dos desafios.
+- Português brasileiro; evitar vocabulário exclusivo de Portugal e palavras obscuras.
+- Respostas em maiúsculas, sem acentos.
+- Pistas correspondem exatamente às respostas, sem ambiguidade.
+
+Se 13×13 se mostrar difícil demais de preencher com qualidade, o domingo também fica em 9×9 até o gerador melhorar. Nunca publicar uma grade inválida.
+
+### Frontend
+
+`frontend/js/crossword.js` passa a aceitar tamanho variável (hoje `.cw-grid` tem 5 colunas fixas; usar variável CSS). Preservar seleção de células, teclado físico e virtual, navegação entre respostas, dica/verificar/limpar, carimbo e salvamento de progresso.
 
 ---
 
-# 8. Estado atual — Protótipo v0.2
+## 7. Sudoku diário — DECIDIDO, A IMPLEMENTAR
+
+- Gerador próprio em `gerador/src/sudoku/`, sem IA e sem API.
+- Grade 9×9, solução válida e **única** (provada pelo solver), reproduzível por semente.
+- V1: só nível fácil. **Níveis de dificuldade ficam para a V2.**
+- Preservar anotações a lápis, dica, verificar e limpar.
+
+---
+
+## 8. Estado atual — Protótipo v0.2
 
 As funcionalidades abaixo já foram implementadas e testadas no Chromium, utilizando uma viewport móvel de 390×844.
 
 ## 8.1. Cena inicial da varanda
 
-Arquivo: `frontend/js/cutscene.js`
+Arquivos: `frontend/js/cutscene3d.js` (cena 3D) e `frontend/js/cutscene.js` (fluxo, botão Pular, título final e plano B em SVG).
 
-Cena animada em primeira pessoa utilizando SVG em camadas e Web Animations API.
+Uma versão em vídeo foi testada em 06/11/2026 e descartada a pedido da proprietária: a cena roda ao vivo.
 
-Elementos:
+Cena em primeira pessoa, **3D low-poly** (Three.js), no mesmo estilo das mãos: facetas, cor por vértice com leve variação, sol baixo da manhã com sombras longas. Ocupa a tela inteira em qualquer proporção (referência 1920×1080; no celular em pé a câmera abre o ângulo e acompanha a bicicleta).
 
-- Varanda branca e azul.
-- Rua americana pela manhã.
-- Jornaleiro de bicicleta.
-- Jornal arremessado aos pés do leitor.
-- Mãos que recolhem o jornal.
-- Transição gradual das cores para sépia.
-- Jornal transformando-se na capa.
+Cenário brasileiro, anos 1940–50 (sem referências à Copa ou a eventos reais):
 
-Duração aproximada: 10 segundos.
+- Varanda com ladrilho hidráulico, gradil de ferro com escadinha no meio, colunas, lambrequim, samambaia pendurada, espada-de-são-jorge, mesinha com cafezinho; pernas do leitor e braços da cadeira de balanço.
+- Rua de paralelepípedo, calçada de pedra portuguesa em ondas, poste colonial, fiação.
+- Casario geminado colorido (platibandas, venezianas, sobrados com beiral), muro com gol de giz, bola de capotão, padaria com toldo, pombos, mangueira, ipê-amarelo, palmeiras, torre da Igreja Matriz e morros ao fundo.
+- O bonde da linha 4 (placa "4 · MATRIZ") passa no início.
+- Vira-lata caramelo deitado na calçada: acompanha com a cabeça o bonde, a bicicleta e o jornal; abana o rabo; põe a língua para fora.
+- Jornaleiro de boina e bigode numa bicicleta com cesta; pedala (IK), pega o jornal na cesta, arremessa, olha para o leitor e cumprimenta com a boina.
+- O jornal é uma folha 3D que enrola e desenrola, com a **capa real** "fotografada" (`GazetaPrint.rasterize`, via `getPaper` em `main.js`).
+- As mãos são as mesmas de `reader3d.js` (`GazetaReader._Hand`), com mangas estendidas.
+- Ao abrir o jornal, o mundo vira tom de jornal **a partir do papel**, numa onda (shader injetado em todos os materiais).
 
-Inclui botão **Pular**.
+Duração: ~10 s, mesma linha do tempo da versão anterior (seção 16). Botão **Pular** e Esc/Enter/Espaço.
 
-A cena é exibida apenas na primeira visita, utilizando:
+Plano B: sem WebGL, a cena SVG antiga (quadro em pé, até 600 px de largura). Com movimento reduzido, a cena não toca.
 
-`localStorage["gazeta:cutscene"]`
+Primeira visita: `localStorage["gazeta:cutscene"]`. Na capa: **Reviver a entrega**.
 
-Na capa, existe o botão **Reviver a entrega**.
+Depuração: `window.__csTimeScale = 0.25` (câmera lenta) e `window.__csSeek = 6.5` (congela a cena 3D nesse instante).
+
+Custo medido (Chromium, 1920×1080): ~19 draw calls e ~88 mil triângulos; chão fora do passe de sombra; shaders e texturas pré-carregados atrás do preto inicial; até ~2,4 MP com resolução dinâmica; tudo é descartado ao terminar.
 
 ## 8.2. Abertura curta
 
@@ -490,37 +390,44 @@ Este é o sudoku estático da versão atual.
 
 ---
 
-# 9. Estrutura atual do projeto
+# 9. Estrutura do projeto
 
 ```text
-frontend/           ← única pasta servida ao navegador
+frontend/                ← site estático, única pasta publicada (Vercel)
   index.html
   css/
-  js/
+  js/                    ← (futuro) js/edicao.js escolhe e carrega a edição do dia
   fonts/
   vendor/
-  editions/         ← edições públicas validadas (AAAA-MM-DD.json)
-backend/            ← estrutura do gerador diário, ainda sem implementação
-  README.md
+  editions/              ← edições já publicadas (AAAA-MM-DD.json), escritas pelo Actions
+gerador/                 ← Node + TypeScript, roda no Mac da proprietária (NÃO é servidor)
   .env.example
   src/
-    noticias/
-    ia/
-    cruzadinha/
+    ia/                  ← conexão com o Ollama (feita à mão, em par)
+    redacao/             ← pauta, matérias, classificados, horóscopo
+    memoria/             ← fichas, arcos, embeddings, antirrepetição
+    cruzadinha/          ← lista de palavras, moldes, preenchimento, pistas
     sudoku/
-    validacao/
-    publicacao/
-  prompts/
-  cache/
+    verificacao/         ← contrato, regras fixas, IA juíza
+    edicao/              ← monta a edição e valida o contrato
+    estoque/             ← cifra o estoque e libera a edição do dia
+  prompts/               ← instruções da IA, separadas do código
+  dados/                 ← bíblia, fichas, arcos, vetores, lista de palavras
+  avaliacao/             ← notas humanas e relatórios de experimentos
   tests/
+estoque/                 ← edições futuras cifradas (vai para o Git)
+.github/workflows/       ← (futuro) publicação diária, testes, aviso de estoque
 scripts/
-  vendor.mjs        ← copia dependências para frontend/
+  vendor.mjs             ← copia dependências para frontend/
 docs/
   CONCEITO.md
-package.json        ← comandos e dependências do projeto
+  decisoes/              ← registro de decisões (ADRs): o quê, por quê, alternativas
+package.json
 ```
 
-### Responsabilidades
+As pastas do gerador ainda estão vazias (só `.gitkeep`).
+
+### Responsabilidades (frontend atual)
 
 | Arquivo | Responsabilidade |
 |---|---|
@@ -530,7 +437,8 @@ package.json        ← comandos e dependências do projeto
 | `frontend/js/crumple.js` | Bola de jornal 3D |
 | `frontend/js/reader3d.js` | Mãos e virada física |
 | `frontend/js/print.js` | Retícula e rasterização |
-| `frontend/js/cutscene.js` | Cena animada da varanda |
+| `frontend/js/cutscene.js` | Fluxo da cena da varanda + plano B em SVG |
+| `frontend/js/cutscene3d.js` | Cena da varanda em 3D low-poly |
 | `frontend/js/crossword.js` | Mecânica das palavras-cruzadas |
 | `frontend/js/crossword-data.js` | Dados da cruzadinha atual |
 | `frontend/js/sudoku.js` | Mecânica e dados do sudoku |
@@ -539,100 +447,61 @@ package.json        ← comandos e dependências do projeto
 
 ---
 
-# 10. Arquitetura técnica atual
+# 10. Arquitetura técnica
 
-O projeto ainda utiliza:
+### Frontend (mantido)
 
-- HTML.
-- CSS.
-- JavaScript sem módulos.
-- IIFE e `var` por decisão arquitetural.
-- Three.js.
-- Web Animations API.
-- SVG.
-- Canvas.
-- `localStorage`.
+- HTML, CSS, JavaScript **sem módulos e sem build**; IIFE e `var` por decisão arquitetural.
+- Three.js, Web Animations API, SVG, Canvas, `localStorage`.
+- Pode ser aberto via `file://` (nesse caso usa a Edição nº 0).
+- **Não migrar o frontend para TypeScript, módulos ou framework agora**: risco para as animações sem ganho real.
 
-Atualmente:
+### Gerador (novo)
 
-- O backend tem estrutura de pastas, mas o gerador ainda não foi implementado.
-- Não existe sistema automático de edições.
-- Não existem chamadas de notícias ou de IA.
-- Não há integração com API de palavras-cruzadas.
-- Não há build obrigatório.
-- O projeto pode ser aberto via `file://`.
+| Para quê | Escolha |
+|---|---|
+| Linguagem | Node 24 + TypeScript |
+| IA | Ollama local, via `fetch` |
+| Contrato/validação | Zod |
+| Testes | Vitest (gerador), Playwright (site) |
 
-A introdução das funcionalidades diárias deverá ser feita de maneira incremental.
+### Hospedagem e automação
 
-**O sistema deve preservar as animações e os componentes existentes.**
+| Peça | Serviço | Observação |
+|---|---|---|
+| Site | **Vercel Hobby** | Gratuito, sem cartão, uso pessoal não comercial; ao exceder limites, pausa (não cobra) |
+| Publicação diária + testes | **GitHub Actions** | Gratuito em repositório público (runners padrão) |
+| Plano B de hospedagem | GitHub Pages | Site estático muda de serviço em minutos |
+
+**Render foi descartado:** não há servidor online para hospedar, e o plano gratuito adormece após 15 min (primeiro leitor esperaria ~1 min).
+
+### Distribuição
+
+**Somente o site.** Lojas ficam fora do escopo por custarem dinheiro (Steam: US$ 100 por app; Apple e Google também cobram). "Mobile" = site responsivo, com opção futura de PWA (instalar pelo navegador, gratuito).
 
 ---
 
-# 11. Arquitetura futura desejada
+# 11. Custo zero — regras inegociáveis
 
-A aplicação será dividida conceitualmente em três camadas.
-
-### Camada 1 — Experiência visual
-
-Responsável por:
-
-- Renderização do jornal.
-- Animações.
-- Navegação.
-- Mãos 3D.
-- Interação com os passatempos.
-- Interface responsiva.
-
-### Camada 2 — Conteúdo diário
-
-Responsável por:
-
-- Carregar a edição da data.
-- Recuperar notícias e referências.
-- Carregar palavras-cruzadas.
-- Carregar sudoku.
-- Recuperar edições anteriores.
-- Exibir uma edição válida quando o conteúdo mais recente não estiver disponível.
-
-### Camada 3 — Geração e publicação
-
-Responsável por:
-
-- Integração com GNews.
-- Recuperação de fontes para RAG.
-- Processamento por IA.
-- Integração com Crossword Generator API.
-- Geração de sudoku.
-- Validação.
-- Armazenamento.
-- Publicação diária.
-
-A camada de geração poderá funcionar separadamente do frontend.
-
-O objetivo inicial é manter o site leve e minimizar os custos operacionais.
+1. **Nenhum serviço com cartão de crédito cadastrado.** Sem cartão, não há cobrança surpresa: no pior caso o serviço para e o plano B entra.
+2. Nada de APIs pagas, assinaturas ou créditos promocionais.
+3. IA só local (Ollama). Embeddings só locais.
+4. Antes de adotar qualquer serviço novo, verificar na documentação oficial: preço, limites, exigência de cartão e o que acontece ao exceder.
+5. Descartados por custo ou risco de custo: GNews, Crossword Generator API, Hugging Face Inference, Render, Steam e lojas de apps.
 
 ---
 
 # 12. Persistência
 
-A aplicação atual utiliza `localStorage`.
+| O quê | Onde |
+|---|---|
+| Edições publicadas | `frontend/editions/AAAA-MM-DD.json` (Git) |
+| Edições futuras | `estoque/` cifrado (Git) |
+| Memória do universo | `gerador/dados/` (JSON, Git) |
+| Progresso do leitor | `localStorage`, chave por edição: `gazeta:progress:cw:AAAA-MM-DD` |
+| Segredos | `gerador/.env` (fora do Git) e *secrets* do GitHub |
 
-Com as edições diárias, será necessário diferenciar:
-
-**Conteúdo editorial:** compartilhado por todos os leitores.
-
-**Progresso:** individual para cada usuário e edição.
-
-Exemplos de chaves locais:
-
-```text
-gazeta:progress:cw:2026-11-05
-gazeta:progress:sd:2026-11-05
-```
-
-As edições publicadas deverão possuir uma identificação própria e armazenamento persistente.
-
-Evitar substituir diretamente os dados estáticos existentes sem uma estratégia de migração.
+As chaves antigas (`gazeta:cw-001`, `gazeta:sd-001`) pertencem à Edição nº 0; não apagar progresso existente sem migração.
 
 ---
 
@@ -679,10 +548,18 @@ Fontes locais:
 - O livro tem largura máxima de 600 px no celular.
 - Verificar dispositivos reais antes da publicação.
 
+## Cache do navegador
+
+O servidor local (`python3 -m http.server`) não impede o navegador de reaproveitar arquivos antigos. Por isso os CSS/JS em `frontend/index.html` levam `?v=…`: **aumente a versão sempre que mudar CSS ou JS**.
+
+## Documentação de decisões
+
+Toda decisão relevante ganha um registro curto em `docs/decisoes/` (contexto, decisão, alternativas descartadas, consequências), incluindo o que ficou **de fora** e por quê.
+
 ## Versionamento
 
 - O repositório Git já foi iniciado.
-- Não realizar commits sem autorização explícita do proprietário.
+- Não realizar commits sem autorização explícita da proprietária.
 
 ---
 
@@ -708,11 +585,11 @@ http://localhost:8000
 
 O protótipo estático também pode ser aberto diretamente pelo `frontend/index.html`.
 
-As funcionalidades futuras que dependam de APIs, servidor ou geração automatizada poderão exigir execução por HTTP e configuração adicional.
+O gerador ainda não tem comandos; quando existir, a rotina mensal será algo como `npm run gerar` → revisão → envio ao GitHub.
 
 ---
 
-# 15. Pendências e roadmap
+# 15. Roadmap
 
 ## Fase 1 — Estabilização do protótipo
 
@@ -725,57 +602,37 @@ As funcionalidades futuras que dependam de APIs, servidor ou geração automatiz
 - [x] Implementar primeiro sudoku.
 - [ ] Testar em iPhone/Safari.
 - [ ] Testar em Android/Chrome.
-- [ ] Melhorar a arte final da cena.
+- [x] Cena da varanda em 3D low-poly, cenário brasileiro.
+- [ ] Testar a cena 3D em celulares reais (desempenho).
 - [ ] Revisar acessibilidade.
 - [ ] Avaliar migração das animações para GSAP.
-- [ ] AAprofundar o soduko apenas na V2
 
-## Fase 2 — Sistema de edições diárias
+## Fase 2 — Edições diárias (ordem de construção; cada etapa entrega algo que funciona sozinho)
 
-- [ ] Definir o formato de dados das edições.
-- [ ] Implementar carregamento por data.
-- [ ] Integrar GNews API.
-- [ ] Implementar pipeline de IA com RAG.
-- [ ] Validar as notícias antes da publicação.
-- [ ] Integrar Crossword Generator API.
-- [ ] Garantir cruzadinhas em pt-BR.
-- [ ] Implementar validação automática das grades.
-- [ ] Desenvolver gerador de sudoku.
-- [ ] Implementar armazenamento persistente.
-- [ ] Criar tarefa de publicação diária.
-- [ ] Implementar fallback para falhas de APIs.
-- [ ] Separar progresso dos jogos por edição.
+- [x] 0. Arrumar a casa: renomear `backend/` → `gerador/`, remover GNews do plano.
+- [ ] 0b. Registrar as decisões do brainstorming em `docs/decisoes/`.
+- [ ] 1. Contrato da edição (Zod) + Edição nº 0 + site carregando por data com fallbacks. Sem IA.
+- [ ] 2. Site: progresso por data, grade de tamanho variável, página do horóscopo, classificados no rodapé da capa.
+- [ ] 3. Gerador de sudoku (TDD: validade, unicidade, semente).
+- [ ] 4. Cruzadinha: lista de palavras VERO filtrada + moldes + preenchimento.
+- [ ] 5. IA: conexão com o Ollama **escrita à mão pela proprietária, em par**; benchmark de modelos.
+- [ ] 6. Bíblia, redação, verificação, IA juíza e calibração com notas humanas.
+- [ ] 7. Memória: fichas, arcos, embeddings, antirrepetição; experimento com × sem memória.
+- [ ] 8. Pistas por IA + teste do solucionador.
+- [ ] 9. Estoque cifrado + GitHub Actions diário + Vercel + aviso de estoque baixo.
+- [ ] 10. Página de prévia para revisar itens duvidosos.
 
-## Fase 3 — Conteúdo e imersão
+## Fase 3 — V2
 
-- [ ] Implementar arquivo de edições antigas.
-- [ ] Adicionar tirinhas.
-- [ ] Adicionar horóscopo.
-- [ ] Adicionar efeitos sonoros opcionais.
-- [ ] Criar botão de mudo.
-- [ ] Melhorar as transições entre edições.
-- [ ] Avaliar palavras-cruzadas temáticas conectadas às manchetes.
+- [ ] Níveis de dificuldade do sudoku.
+- [ ] Navegação pelas edições antigas.
+- [ ] PWA (instalar pelo navegador).
+- [ ] Efeitos sonoros opcionais com botão de mudo.
 
-## Fase 4 — Distribuição
+## Fora do escopo (por custo)
 
-- [ ] Avaliar migração para módulos ES e Vite.
-- [ ] Implementar PWA.
-- [ ] Avaliar suporte offline.
-- [ ] Empacotar para iOS e Android com Capacitor.
-- [ ] Avaliar Electron ou Tauri para Steam.
-- [ ] Pesquisar requisitos, custos e regras das lojas.
-- [ ] Inicializar Git e configurar repositório remoto, com autorização.
-
-## Fase 5 — Qualidade
-
-- [ ] Criar testes automatizados para os jogos.
-- [ ] Testar geração diária.
-- [ ] Testar a unicidade das soluções de sudoku.
-- [ ] Testar cruzadinhas com dados inválidos.
-- [ ] Testar indisponibilidade das APIs.
-- [ ] Testar o processo de recuperação de edições.
-- [ ] Avaliar desempenho em dispositivos de entrada.
-- [ ] Validar acessibilidade dos jogos e das animações.
+- Steam, App Store, Google Play.
+- Qualquer API ou serviço pago.
 
 ---
 
@@ -797,25 +654,20 @@ Existe a possibilidade de migração para `gsap.timeline()`.
 
 O `transform-origin` em pixels utiliza o sistema de coordenadas local do elemento.
 
-### Cena
-
-`viewBox="0 0 400 800"`
-
-`preserveAspectRatio="xMidYMid slice"`
-
-Elementos importantes devem permanecer entre `y=120` e `y=720`.
-
 ### Linha do tempo da cena
 
-- Fade-in: 0–1 s.
-- Bicicleta: 1,2–4,9 s.
-- Arremesso: 3,45 s.
-- Jornal pousa: aproximadamente 4,8 s.
+- Fade-in: 0–1 s · bonde passa: 0–3,1 s.
+- Bicicleta: 1,2–4,9 s · pega o jornal na cesta: ~2,9 s.
+- Arremesso: 3,45 s · cumprimento com a boina: 3,85–4,25 s.
+- Jornal pousa: ~4,95 s.
 - Câmera olha para baixo: 5–6 s.
-- Mãos: 5,55–7,3 s.
-- Transição para sépia: 6,3–8,2 s.
-- Capa cresce: 7,3–8,6 s.
+- Mãos: 5,5–6,27 s (pegam o rolo) · levantam: 6,25–7 s.
+- Elástico estoura: 6,92 s · jornal desenrola: 6,95–7,6 s.
+- Tom de jornal se espalha a partir do papel: 7–8,4 s.
+- Jornal cobre a tela: 7,6–8,5 s · título: 8,45 s.
 - Encerramento: 9,5 s.
+
+As cenas SVG usam `viewBox="0 0 400 800"` com `preserveAspectRatio="xMidYMid slice"` (elementos importantes entre `y=120` e `y=720`).
 
 ### Palavras-cruzadas
 
@@ -823,7 +675,7 @@ O caractere `#` representa casas pretas.
 
 A classe `.cw-grid` utiliza atualmente cinco colunas.
 
-Grades dinâmicas exigirão adaptação do CSS e validação de compatibilidade.
+Grades 9×9 e 13×13 exigirão adaptação do CSS e validação de compatibilidade.
 
 ### Testes
 
@@ -833,6 +685,8 @@ Utilizar Chrome/Playwright com:
 - `isMobile`.
 - `hasTouch`.
 
+Testes do gerador com Vitest; a IA é testada com uma IA falsa (respostas fixas) para o fluxo, e por avaliação (métricas) para a qualidade.
+
 ---
 
 # 17. Princípios de desenvolvimento
@@ -840,14 +694,15 @@ Utilizar Chrome/Playwright com:
 1. Preservar a identidade visual e a experiência imersiva já construídas.
 2. Não reescrever componentes funcionais sem necessidade.
 3. Priorizar soluções simples, testáveis e sustentáveis.
-4. Evitar dependências desnecessárias.
-5. Manter o projeto preparado para web, mobile e desktop.
-6. Garantir que notícias reais sejam baseadas em fontes verificáveis.
+4. Evitar dependências desnecessárias e tecnologia "para parecer sofisticado": cada peça precisa justificar seu valor.
+5. **Custo zero** (seção 11).
+6. Toda saída da IA passa por verificação antes de publicar; na dúvida, revisão humana.
 7. Validar todas as palavras-cruzadas antes da publicação.
 8. Garantir sudoku com solução única.
-9. Não expor credenciais ou segredos no navegador.
-10. Manter edições diárias estáveis e recuperáveis.
+9. Não expor credenciais ou segredos no navegador nem edições futuras no repositório público.
+10. Manter edições diárias estáveis e recuperáveis; o site nunca fica em branco.
 11. Utilizar pt-BR em toda a experiência.
-12. Não realizar commits sem autorização.
+12. Medir qualidade da IA com números, não com impressão.
+13. Não realizar commits sem autorização.
 
-**Visão final:** transformar A Gazeta do Dia em um jornal digital vivo, no qual o leitor retorna diariamente para descobrir novas histórias, resolver desafios inéditos e desfrutar da experiência de folhear um jornal antigo.
+**Visão final:** transformar A Gazeta do Dia em um jornal digital vivo, no qual o leitor retorna diariamente para descobrir novas histórias de uma cidade que lembra o que aconteceu ontem, resolver desafios inéditos e desfrutar da experiência de folhear um jornal antigo.

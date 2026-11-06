@@ -4,7 +4,5 @@ node_modules/
 dist/
 .env
 
-# backend: segredos e cache de respostas das APIs
-backend/.env
-backend/cache/*
-!backend/cache/.gitkeep
+# gerador: segredos
+gerador/.env
